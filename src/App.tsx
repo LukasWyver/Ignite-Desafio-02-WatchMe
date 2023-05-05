@@ -1,34 +1,49 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState } from "react";
 
-import { MovieCard } from './components/MovieCard';
+import { SideBar } from "./components/SideBar";
+import { Content } from "./components/Content";
 
-import { GenreResponseProps, SideBar } from './components/SideBar';
-// import { SideBar } from './components/SideBar';
-import { Content } from './components/Content';
-// import { Content } from './components/Content';
+import { api } from "./services/api";
 
-import { api } from './services/api';
+import "./styles/global.scss";
+import "./styles/sidebar.scss";
+import "./styles/content.scss";
 
-import './styles/global.scss';
-
-import './styles/sidebar.scss';
-import './styles/content.scss';
-
-
+export interface GenreResponseProps {
+  id: number;
+  name: "action" | "comedy" | "documentary" | "drama" | "horror" | "family";
+  title: string;
+}
 
 export function App() {
-  const [selectedGenreId, setSelectedGenreId] = useState(1);  
+  const [selectedGenreId, setSelectedGenreId] = useState(1);
+  const [selectedGenre, setSelectedGenre] = useState<GenreResponseProps>(
+    {} as GenreResponseProps
+  );
 
+  useEffect(() => {
+    api
+      .get<GenreResponseProps>(`genres/${selectedGenreId}`)
+      .then((response) => {
+        setSelectedGenre(response.data);
+      });
+  }, [selectedGenreId]);
 
- function handleSelectedGenreIdChange(value: number){
-  setSelectedGenreId(value)
- }
+  function handleClickButton(id: number) {
+    setSelectedGenreId(id);
+  }
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'row' }}>
-      <SideBar onChange={(value) => handleSelectedGenreIdChange(value)}/>
+    <div style={{ display: "flex", flexDirection: "row" }}>
+      <SideBar
+        handleClickButton={handleClickButton}
+        selectedGenreId={selectedGenreId}
+      />
 
-      <Content GenreId={selectedGenreId}/>
+      <Content
+        selectedGenre={selectedGenre}
+        selectedGenreId={selectedGenreId}
+      />
     </div>
-  )
+  );
 }
